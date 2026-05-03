@@ -9,6 +9,7 @@ TagManager:
   - Lava
   - Key
   - Win
+  - Ice
   layers:
   - Default
   - TransparentFX
@@ -17,7 +18,7 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
+  - Ice
   - 
   - 
   - 

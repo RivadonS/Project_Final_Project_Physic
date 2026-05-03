@@ -6,15 +6,18 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float iceMoveSpeed = 8f;
     [SerializeField] private float jumpForce = 10f;
 
-    [Header("Ground Check")]
+    [Header("Ground & Ice Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask iceLayer;
 
     private Rigidbody2D rb;
     private bool isGrounded;
+    private bool isOnIce;
     private Vector2 moveInput;
 
     [Header("Game State")]
@@ -33,14 +36,15 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (groundCheck == null)
-        {
-            Debug.LogError("🚨 จับได้แล้ว! ลืมลาก Ground Check ใส่ในช่องของ Object ชื่อ: '" + gameObject.name + "' ครับ!");
-            return;
-        }
+        if (groundCheck == null) return;
 
         //Check if the player is grounded
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        bool touchGround = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        bool touchIce = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, iceLayer);
+
+        isGrounded = touchGround || touchIce;
+
+        isOnIce = touchIce && !touchGround;
     }
 
     void FixedUpdate()
@@ -48,7 +52,18 @@ public class PlayerController : MonoBehaviour
         //Move the player
         if (rb != null)
         {
-            rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+            if (isOnIce)
+            {
+                if (Mathf.Abs(moveInput.x) > 0.1f)
+                {
+                    rb.linearVelocity = new Vector2(moveInput.x * iceMoveSpeed, rb.linearVelocity.y);
+                }
+
+            }
+            else
+            {
+                rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+            }
         }
     }
 
