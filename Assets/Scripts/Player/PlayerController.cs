@@ -10,8 +10,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sprintMultiplier = 1.5f;
     [SerializeField] private float jumpForce = 10f;
     [SerializeField] private float iceSlipFactor = 3f;
-    [Header("Animation")]
-    [SerializeField] private Animator animator;
 
     [Header("Physics: Air Resistance (Glide)")]
     [SerializeField] private float dragCoefficient = 10f; // ค่า k (สัมประสิทธิ์แรงต้านอากาศ) ปรับให้ร่อนช้าหรือเร็วได้ตรงนี้
@@ -22,7 +20,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask iceLayer;
-    
 
     private Rigidbody2D rb;
     private bool isGrounded;
@@ -38,7 +35,6 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         if (rb == null) Debug.LogError("🚨 สคริปต์ PlayerController หา Rigidbody2D ไม่เจอครับ!");
-        if (animator == null) Debug.LogError("🚨 สคริปต์ PlayerController หา Animator ไม่เจอครับ!");
     }
 
     void Update()
@@ -71,18 +67,18 @@ public class PlayerController : MonoBehaviour
                 float targetSpeedX = moveInput.x * currentIceSpeed;
                 float smoothedX = Mathf.Lerp(rb.linearVelocity.x, targetSpeedX, Time.fixedDeltaTime * iceSlipFactor);
                 rb.linearVelocity = new Vector2(smoothedX, rb.linearVelocity.y);
-                animator.SetFloat("Speed", Mathf.Abs(smoothedX));
+               
             }
             else
             {
                 rb.linearVelocity = new Vector2(moveInput.x * currentMoveSpeed, rb.linearVelocity.y);
-                animator.SetFloat("Speed", Mathf.Abs(moveInput.x * currentMoveSpeed));
             }
 
             // --- 2. Air Resistance (Glide) ---
             if (rb.linearVelocity.y < 0 && isGliding && !isGrounded)
             {
                 float velocityY = rb.linearVelocity.y;
+
                 // คํานวณแรงต้านตามสูตร: F_drag = k * v^2
                 // (ใช้ v*v ค่าจะออกมาเป็นบวกเสมอ ซึ่งถูกต้องเพราะแรงต้านต้องมีทิศทางชี้ขึ้น สวนกับความเร็วที่ตกลงมา)
                 float dragForce = dragCoefficient * (velocityY * velocityY);
@@ -101,16 +97,8 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed && isGrounded)
         {
-            animator.SetBool("Jump", true);
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            Invoke("ResetJumpAnimation", 0.1f); // รีเซ็ตแอนิเมชันหลังจากกระโดด
         }
-    
-    }
-
-    private void ResetJumpAnimation()
-    {
-        animator.SetBool("Jump", false);
     }
 
     public void OnSprint(InputValue value)
@@ -145,7 +133,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void Die()
+    private void Die()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
